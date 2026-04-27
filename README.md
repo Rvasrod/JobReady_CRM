@@ -30,6 +30,9 @@ Mini CRM para gestionar empresas objetivo, candidaturas, entrevistas y tareas de
 - ✅ Validaciones reactivas con feedback visual
 - ✅ Rutas protegidas con guard + interceptor JWT
 - ✅ Diseño responsive con Angular Material
+- ✅ **Backend en 4 capas** (routes / validators / controllers / services)
+- ✅ **Frontend `core/features/shared`** con componentes < 150 líneas
+- ✅ **Tests unitarios** — 17 Jest (backend) + 9 Karma/Jasmine (frontend)
 - 🔜 Candidaturas con estado del proceso (próxima iteración)
 - 🔜 Registro de entrevistas con notas (próxima iteración)
 - 🔜 Tareas de seguimiento por candidatura (próxima iteración)
@@ -57,6 +60,7 @@ npm install
 cp .env.example .env       # edita las variables
 npm run dev                # nodemon, recarga automática
 # o: npm start             # node directo
+npm test                   # ejecuta los tests Jest
 ```
 
 API en `http://localhost:3001/api`. Health check: `GET /api/health`.
@@ -67,6 +71,7 @@ API en `http://localhost:3001/api`. Health check: `GET /api/health`.
 cd frontend
 npm install
 npx ng serve --port 4200
+npx ng test --watch=false --browsers=ChromeHeadless   # ejecuta los tests Karma
 ```
 
 App en `http://localhost:4200`. Te redirige a `/login` (regístrate la primera vez) → `/dashboard`.
@@ -98,18 +103,18 @@ JobReady_CRM/
 ├── backend/
 │   ├── .env.example
 │   ├── package.json
+│   ├── tests/
+│   │   └── services/         → tests Jest (auth, companies, stats)
 │   └── src/
-│       ├── app.js           → Servidor Express
+│       ├── app.js             → Servidor Express
 │       ├── db/
 │       │   ├── connection.js  → Pool MySQL
 │       │   └── schema.sql     → DDL
-│       ├── middleware/
-│       │   ├── auth.middleware.js     → Verifica JWT
-│       │   └── validate.middleware.js → express-validator
-│       └── routes/
-│           ├── auth.routes.js
-│           ├── companies.routes.js
-│           └── stats.routes.js
+│       ├── middleware/        → auth + validate
+│       ├── validators/        → reglas express-validator por recurso
+│       ├── controllers/       → req/res, mapping a HTTP
+│       ├── services/          → lógica de negocio + acceso a DB
+│       └── routes/            → solo paths + cadena de middleware
 │
 └── frontend/
     └── src/
@@ -122,7 +127,10 @@ JobReady_CRM/
             │   │   ├── auth.guard.ts        → CanActivateFn
             │   │   └── auth.interceptor.ts  → Bearer + 401
             │   ├── models/  → Company, User, DashboardStats
-            │   └── services/ → AuthService, CompaniesService, StatsService
+            │   └── services/ → AuthService, CompaniesService, StatsService (+ .spec.ts)
+            ├── shared/
+            │   └── components/
+            │       └── app-toolbar.component.ts → toolbar reutilizable
             └── features/
                 ├── auth/         → login, register
                 ├── companies/    → list (con filtros), form (create/edit)
@@ -131,6 +139,10 @@ JobReady_CRM/
 
 ## Decisiones técnicas
 
+- **Backend en 4 capas** (`routes → validators → controllers → services`) → cada capa hace una cosa. Los servicios lanzan errores con `.status` y los controllers los traducen a HTTP, sin try/catch duplicado en cada handler.
+- **Frontend `core/features/shared`** → `shared/` para componentes reutilizables (ej. `AppToolbarComponent`), `core/` para infraestructura (auth, services, models), `features/` para pantallas.
+- **Componentes < 150 líneas** → templates y estilos extraídos a `.html` y `.scss` separados. Solo lógica en el `.ts`.
+- **Tests unitarios** → Jest en backend (pool MySQL mockeado) y Karma+Jasmine en frontend (`HttpTestingController` para servicios HTTP).
 - **Standalone Components** (Angular 17+) en lugar de NgModules → menos boilerplate, lazy loading directo desde rutas con `loadComponent`.
 - **Signals** para estado local de componentes (`items`, `filteredItems`, `loading`, `stats`) → mejor rendimiento que BehaviorSubject + async pipe en casos simples.
 - **Reactive Forms** con `nonNullable.group` y validadores → tipos seguros en el form value.
@@ -147,7 +159,8 @@ JobReady_CRM/
 - [ ] To-do de seguimiento (`follow_up_tasks`)
 - [ ] Gráficos reales (Chart.js) en lugar de progress bars
 - [ ] Notificaciones MatSnackBar para feedback de éxito
-- [ ] Tests unitarios (Jest backend, Karma frontend)
+- [x] ~~Tests unitarios (Jest backend, Karma frontend)~~ ✅
+- [ ] Tests de controllers/rutas (supertest) y de componentes Angular
 - [ ] Dockerización + CI/CD
 
 ## Autor

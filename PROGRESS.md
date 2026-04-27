@@ -455,6 +455,101 @@ gh repo create jobready-crm --public --source=. --remote=origin --push
 
 ---
 
+## Lección 1 (Sprint pro) — Refactor y Arquitectura Profesional ✅ COMPLETADA
+
+**Fecha:** 2026-04-27
+
+### Objetivo
+Llevar el proyecto del nivel "ejercicio académico" a un nivel defendible en entrevista: separar
+responsabilidades en el backend, organizar el frontend con `core/features/shared`, mantener
+componentes pequeños (<150 líneas) y añadir tests unitarios para los servicios principales.
+
+### Backend — separación en 4 capas
+
+Antes la lógica vivía toda en `routes/`. Ahora cada ruta delega:
+
+```
+backend/src/
+├── routes/         → solo paths + cadena de middleware
+├── validators/     → reglas express-validator (auth.validators, companies.validators)
+├── controllers/    → HTTP (req/res), traducción de errores → status code
+├── services/       → lógica de negocio + acceso a DB
+├── middleware/     → auth.middleware, validate.middleware
+└── db/             → connection (pool MySQL) + schema.sql
+```
+
+**Archivos nuevos:**
+- `services/auth.service.js` (register, login, getProfile)
+- `services/companies.service.js` (findAllByUser, findOneByUser, create, update, remove)
+- `services/stats.service.js` (getDashboard)
+- `controllers/auth.controller.js`, `controllers/companies.controller.js`, `controllers/stats.controller.js`
+- `validators/auth.validators.js`, `validators/companies.validators.js`
+
+**Cambios en rutas:** pasaron de tener toda la lógica embebida (50–100 líneas con try/catch repetido)
+a 10–15 líneas que solo encadenan `validators → validate → controller`.
+
+**Detalle adicional:** los servicios lanzan errores con `error.status` (400/401/404) y los
+controllers los traducen a HTTP, evitando duplicar try/catch en cada handler.
+
+Eliminada la carpeta `models/` vacía que arrastrábamos desde la Lección 2.
+
+### Frontend — estructura `core/features/shared`
+
+Añadida carpeta `app/shared/` con un **AppToolbarComponent** standalone reutilizable:
+- Antes la toolbar (≈10 líneas) estaba duplicada en `dashboard`, `companies-list` y `companies-form`.
+- Ahora se importa como `<app-toolbar>` y centraliza el `logout()` y la navegación.
+
+**Templates y estilos extraídos** de los 3 componentes grandes a archivos `.html` y `.scss`
+(separación View / Logic). El `.ts` queda solo con la lógica.
+
+### Componentes < 150 líneas
+
+| Componente | Antes | Después |
+|---|---|---|
+| `dashboard.component.ts` | 211 | **43** |
+| `companies-list.component.ts` | 215 | **104** |
+| `companies-form.component.ts` | 153 | **96** |
+| `login.component.ts` | 83 | 83 |
+| `register.component.ts` | 88 | 88 |
+| `app-toolbar.component.ts` (nuevo) | — | 36 |
+
+✅ Todos los componentes por debajo del límite de 150 líneas.
+
+### Tests unitarios
+
+**Backend (Jest)** — 17 tests / 3 suites:
+- `tests/services/auth.service.test.js` — register OK / email duplicado (400) / login OK /
+  usuario no existe (401) / password incorrecta (401) / getProfile OK / not found (404).
+- `tests/services/companies.service.test.js` — list, findOne (existe / no existe), create con valores
+  por defecto, update OK / 404, remove OK / 404.
+- `tests/services/stats.service.test.js` — agregación completa + caso `avgRating=0` cuando no hay ratings.
+
+Pool de MySQL mockeado con `jest.mock('../../src/db/connection')` para no tocar BD real.
+
+**Frontend (Karma + Jasmine)** — 9 tests / 3 suites:
+- `core/services/auth.service.spec.ts` — login persiste token+user, logout limpia localStorage,
+  register hace POST.
+- `core/services/companies.service.spec.ts` — getAll/getById mapeo, create/update/delete URLs y métodos.
+- `core/services/stats.service.spec.ts` — extracción de `data` de la respuesta.
+
+Usado `provideHttpClientTesting()` + `HttpTestingController` (Angular 20).
+
+### Resultado de los tests
+
+```
+backend:  Tests: 17 passed, 17 total
+frontend: TOTAL: 9 SUCCESS (Chrome Headless)
+```
+
+### Criterios de éxito (lección)
+- [x] Backend separado en routes / controllers / services / validators.
+- [x] Frontend con estructura `core/`, `features/`, `shared/`.
+- [x] Ningún componente supera 150 líneas.
+- [x] Tests unitarios básicos para los servicios principales (3 backend + 3 frontend).
+- [x] Documentado en commit con mensaje explicando qué cambió y por qué.
+
+---
+
 ## Pendiente
 
 ### Lecciones futuras / mejoras
@@ -463,7 +558,8 @@ gh repo create jobready-crm --public --source=. --remote=origin --push
 - [ ] Gráficos reales con Chart.js o similar (ahora usamos progress-bars).
 - [ ] Validación más estricta en PUT (al menos 1 campo).
 - [ ] Manejo centralizado de errores con interceptor + snackbar (MatSnackBar).
-- [ ] Tests unitarios (Jest backend, Karma frontend).
+- [x] ~~Tests unitarios (Jest backend, Karma frontend).~~ ← Lección 1 (Sprint pro)
+- [ ] Tests para controllers/rutas (supertest) y para componentes Angular.
 - [ ] Dockerización + pipeline CI/CD.
 - [ ] Deploy real (backend en Railway/Render, frontend en Vercel/Netlify, DB gestionada).
 

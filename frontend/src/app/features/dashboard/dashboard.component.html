@@ -1,0 +1,93 @@
+<app-toolbar></app-toolbar>
+
+<div class="dashboard">
+  <h1>Panel de Control</h1>
+  <p *ngIf="loading()">Cargando métricas...</p>
+
+  <ng-container *ngIf="stats() as s">
+    <div class="metrics-grid">
+      <mat-card class="metric-card highlight">
+        <mat-card-content>
+          <mat-icon>business</mat-icon>
+          <div class="metric-value">{{ s.total }}</div>
+          <div class="metric-label">Empresas registradas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <mat-icon>star</mat-icon>
+          <div class="metric-value">{{ s.avgRating || '—' }}</div>
+          <div class="metric-label">Rating medio</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <mat-icon>category</mat-icon>
+          <div class="metric-value">{{ s.bySector.length }}</div>
+          <div class="metric-label">Sectores distintos</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <mat-icon>trending_up</mat-icon>
+          <div class="metric-value">{{ topSector() }}</div>
+          <div class="metric-label">Sector top</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="row">
+      <mat-card class="col">
+        <mat-card-header>
+          <mat-card-title>Distribución por sector</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p *ngIf="!s.bySector.length" class="empty">Sin datos.</p>
+          <div *ngFor="let item of s.bySector" class="bar-row">
+            <span class="bar-label">{{ item.sector }}</span>
+            <mat-progress-bar mode="determinate" [value]="(item.count / s.total) * 100"></mat-progress-bar>
+            <span class="bar-count">{{ item.count }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="col">
+        <mat-card-header>
+          <mat-card-title>Distribución por rating</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p *ngIf="!s.byRating.length" class="empty">Sin datos.</p>
+          <div *ngFor="let item of s.byRating" class="bar-row">
+            <span class="bar-label">{{ item.rating }} ★</span>
+            <mat-progress-bar mode="determinate" [value]="(item.count / s.total) * 100" color="accent"></mat-progress-bar>
+            <span class="bar-count">{{ item.count }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card class="recent-card">
+      <mat-card-header>
+        <mat-card-title>Actividad reciente</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p *ngIf="!s.recent.length" class="empty">
+          Aún no hay empresas. <a routerLink="/companies/new">Crea la primera</a>.
+        </p>
+        <a class="recent-item" *ngFor="let item of s.recent" [routerLink]="['/companies', item.id]">
+          <div class="recent-main">
+            <strong>{{ item.name }}</strong>
+            <span class="muted">{{ item.sector || 'Sin sector' }}</span>
+          </div>
+          <div class="recent-meta">
+            <span class="rating">{{ item.rating || 0 }} ★</span>
+            <span class="muted">{{ item.createdAt | date:'short' }}</span>
+          </div>
+        </a>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>
