@@ -625,6 +625,65 @@ relaciones, aislamiento por org, tabla de roles/permisos, decisiones técnicas.
 
 ---
 
+## Fase 2 (pivote ATS) — Auth multi-tenant ✅ COMPLETADA
+
+**Fecha:** 2026-04-27
+
+### Nuevo: `services/organizations.service.js`
+- `findById(id)`, `findByInviteCode(code)`.
+- `create(name)` genera un `inviteCode` aleatorio (8 chars base36, mayúsculas) y reintenta
+  hasta 5 veces si la columna UNIQUE colisiona.
+- `generateInviteCode()` exportada para tests.
+
+### Nuevo: `middleware/require-role.middleware.js`
+- `requireRole('admin')` → 403 si `req.user.role` no está en la lista permitida.
+- Pensado para encadenarlo después de `auth.middleware.js` en rutas admin-only.
+
+### `services/auth.service.js` — adaptado a multi-tenant
+- `register({ name, email, password, organizationName | inviteCode })`:
+  - Si llega `inviteCode`: valida que la org exista → role `recruiter`.
+  - Si llega `organizationName`: crea org nueva → role `admin`.
+- JWT firma `{ id, email, organizationId, role }` (antes solo `{ id, email }`).
+- `getProfile` hace JOIN con `organizations` → devuelve `organizationName` y
+  `organizationInviteCode` (útil para que el admin lo comparta desde el frontend).
+
+### Validators
+- `registerValidator` añade reglas `optional` para `organizationName` y `inviteCode`, más una
+  validación XOR que exige exactamente uno de los dos.
+
+### Tests
+- `tests/services/auth.service.test.js` reescrito (8 tests) — cubre:
+  alta como admin, alta como recruiter, inviteCode inválido, email duplicado,
+  login devolviendo JWT con orgId+role, login fallando, getProfile con orgName.
+- `tests/services/organizations.service.test.js` nuevo (5 tests) — `findByInviteCode`
+  hit/miss, `create` ok, `create` reintenta tras `ER_DUP_ENTRY`, `generateInviteCode` formato.
+
+```
+Test Suites: 4 passed, 4 total
+Tests:       24 passed, 24 total
+```
+
+### Smoke test end-to-end
+Backend arrancado con `node src/app.js`, BD limpia recién creada:
+
+| Caso | Resultado |
+|---|---|
+| Register `organizationName='AccioSoft'` | 201, JWT con role=admin, orgId=1 |
+| Login + GET /me | devuelve `organizationName: 'AccioSoft'`, `organizationInviteCode: 'G85BGQG3'` |
+| Register `inviteCode='G85BGQG3'` | 201, JWT con role=recruiter, mismo orgId=1 |
+| Register `inviteCode='NOTREAL'` | 400 "Código de invitación no válido" |
+| Register sin org ni código | 400 "Debes crear una organización..." |
+| Register con org y código a la vez | 400 "Indica organizationName o inviteCode, no ambos" |
+
+DB final: 1 org `AccioSoft`, 2 users (admin + recruiter) en la misma org.
+
+### ⚠️ Estado transitorio
+- `/api/companies` sigue mounteado en `app.js` pero la tabla `companies` ya no existe → el endpoint
+  fallará en runtime. La Fase 3 lo reemplazará por `/api/candidates` + `/api/positions` +
+  `/api/applications`. Decisión consciente para no inflar este commit.
+
+---
+
 ## Pendiente
 
 ### Lecciones futuras / mejoras
