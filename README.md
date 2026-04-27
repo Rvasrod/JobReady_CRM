@@ -2,7 +2,16 @@
 
 > Tu CRM de búsqueda de empleo
 
+[![Repo](https://img.shields.io/badge/GitHub-Rvasrod%2FJobReady__CRM-181717?logo=github)](https://github.com/Rvasrod/JobReady_CRM)
+[![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white)](https://angular.dev)
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)](https://expressjs.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#licencia)
+
 Mini CRM para gestionar empresas objetivo, candidaturas, entrevistas y tareas de seguimiento durante el proceso de búsqueda de trabajo. Construido como proyecto final del Sprint 5 — AccioSoft Dev Academy.
+
+**Repositorio:** https://github.com/Rvasrod/JobReady_CRM
 
 ---
 
