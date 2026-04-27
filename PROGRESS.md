@@ -761,10 +761,77 @@ intentando acceder por id directo (devuelve 404 sin revelar existencia).
 
 ---
 
+## Fase 4 (pivote ATS) — Frontend App Shell ✅ COMPLETADA
+
+**Fecha:** 2026-04-27
+
+### Modelos creados (frontend/src/app/core/models/)
+- `organization.model.ts` — Organization { id, name, inviteCode }
+- `candidate.model.ts` — Candidate, CandidateFormData, Seniority
+- `position.model.ts` — Position, PositionFormData, PositionStatus, Seniority
+- `application.model.ts` — Application, ApplicationFormData, ApplicationStatus
+- `user.model.ts` — actualizado con organizationId, role, MeResponse
+- `stats.model.ts` — actualizado para KPIs ATS (PipelineStage, PipelineItem, RecentApplication)
+
+### Servicios creados
+- `candidates.service.ts` — CRUD con mapeo { data: ... }
+- `positions.service.ts` — CRUD con mapeo { data: ... }
+- `applications.service.ts` — CRUD + updateStatus
+- `auth.service.ts` — actualizado register(name, email, password, organizationName?, inviteCode?)
+
+### App Shell
+- `shared/components/app-layout.component.ts` — sidebar navegación con:
+  - Logo "JobReady"
+  - Links: Dashboard, Candidatos, Vacantes, Pipeline
+  - Info del usuario (nombre, rol)
+  - Botón cerrar sesión
+
+### Routing actualizado (app.routes.ts)
+- Layout con children bajo AppLayoutComponent
+- Rutas: dashboard, candidates, candidates/new, candidates/:id, positions, positions/new, positions/:id, applications
+- Todas protegidas con authGuard
+
+### Componentes nuevos
+- `features/candidates/candidates-list.component.ts` — grid con filtros por nombre/seniority
+- `features/candidates/candidates-form.component.ts` — create/edit con ReactiveForms
+- `features/positions/positions-list.component.ts` — grid con filtro por status
+- `features/positions/positions-form.component.ts` — create/edit con department/location
+- `features/applications/applications-list.component.ts` — pipeline kanban con 5 columnas
+- `features/dashboard/dashboard.component.ts` — reescrito con KPIs ATS (4 metric-cards + pipeline + recientes)
+
+### Backend: formato de respuestas corregido
+- `candidates.controller.js` — { success: true, data: ... }
+- `positions.controller.js` — { success: true, data: ... }
+- `applications.controller.js` — { success: true, data: ... }
+- `stats.service.js` — formato coincide con modelo frontend
+
+### Build verificado
+```
+ng build → Application bundle generation complete
+Lazy chunks: dashboard, candidates-list, candidates-form, positions-list, positions-form, applications-list
+```
+
+### Smoke test end-to-end
+| Caso | Resultado |
+|------|-----------|
+| POST /api/candidates | 201 + { success: true, data: {...} } |
+| POST /api/positions | 201 + { success: true, data: {...} } |
+| POST /api/applications | 201 + { success: true, data: {...} } con candidateName, positionTitle |
+| GET /api/stats | KPIs activos + pipeline con etapas |
+
+---
+
+## Fase 5 (pivote ATS) — Pendiente
+- [ ] Testing end-to-end completo en navegador
+- [ ] Limpiar componentes antiguos de "companies"
+- [ ] Validación de formularios más estricta
+- [ ] Manejo de errores con MatSnackBar
+
+---
+
 ## Pendiente
 
 ### Lecciones futuras / mejoras
-- [ ] Rutas backend + UI para `applications`, `interviews`, `follow_up_tasks`.
 - [ ] Filtros server-side con paginación (cuando crezcan los datos).
 - [ ] Gráficos reales con Chart.js o similar (ahora usamos progress-bars).
 - [ ] Validación más estricta en PUT (al menos 1 campo).
@@ -805,4 +872,8 @@ curl http://localhost:3001/api/health
 - Backend API: http://localhost:3001/api
 - Frontend SPA: http://localhost:4200
 - Login: http://localhost:4200/login
-- Companies: http://localhost:4200/companies (requiere login)
+- Registro: http://localhost:4200/register
+- Dashboard: http://localhost:4200/dashboard (requiere login)
+- Candidatos: http://localhost:4200/candidates (requiere login)
+- Vacantes: http://localhost:4200/positions (requiere login)
+- Pipeline: http://localhost:4200/applications (requiere login)

@@ -23,7 +23,7 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="login-wrapper">
       <mat-card class="login-card">
-        <mat-card-title>JobReady CRM — Login</mat-card-title>
+        <mat-card-title>JobReady - Login</mat-card-title>
         <form [formGroup]="form" (ngSubmit)="submit()">
           <mat-form-field appearance="outline" class="full">
             <mat-label>Email</mat-label>

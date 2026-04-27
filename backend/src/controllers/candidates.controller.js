@@ -7,15 +7,15 @@ function fail(res, error) {
 async function list(req, res) {
   try {
     const candidates = await service.findAllByOrg(req.user.organizationId);
-    res.json({ candidates });
+    res.json({ success: true, data: candidates });
   } catch (error) { fail(res, error); }
 }
 
 async function detail(req, res) {
   try {
     const candidate = await service.findOneByOrg(req.params.id, req.user.organizationId);
-    if (!candidate) return res.status(404).json({ message: 'Candidato no encontrado' });
-    res.json({ candidate });
+    if (!candidate) return res.status(404).json({ success: false, message: 'Candidato no encontrado' });
+    res.json({ success: true, data: candidate });
   } catch (error) { fail(res, error); }
 }
 
@@ -26,7 +26,7 @@ async function create(req, res) {
       req.user.id,
       req.body
     );
-    res.status(201).json({ message: 'Candidato creado', candidate });
+    res.status(201).json({ success: true, data: candidate });
   } catch (error) { fail(res, error); }
 }
 
@@ -37,14 +37,14 @@ async function update(req, res) {
       req.user.organizationId,
       req.body
     );
-    res.json({ message: 'Candidato actualizado', candidate });
+    res.json({ success: true, data: candidate });
   } catch (error) { fail(res, error); }
 }
 
 async function remove(req, res) {
   try {
     await service.remove(req.params.id, req.user.organizationId);
-    res.json({ message: 'Candidato eliminado' });
+    res.json({ success: true });
   } catch (error) { fail(res, error); }
 }
 

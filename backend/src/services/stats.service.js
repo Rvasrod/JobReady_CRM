@@ -63,10 +63,10 @@ async function getDashboard(organizationId) {
   const pipeline = PIPELINE_STAGES.map((stage) => {
     const stageRows = pipelineRows.filter((r) => r.status === stage);
     return {
-      stage,
+      status: stage,
       count: stageRows.length,
       items: stageRows.slice(0, 5).map((r) => ({
-        applicationId: r.id,
+        id: r.id,
         candidateId: r.candidateId,
         candidateName: r.candidateName,
         seniority: r.seniority,
@@ -90,9 +90,19 @@ async function getDashboard(organizationId) {
   );
 
   return {
-    kpis: { activeCandidates, openPositions, offersOut, hiredThisMonth },
+    activeCandidates,
+    openPositions,
+    offersOut,
+    hiredThisMonth,
     pipeline,
-    recent,
+    recent: recent.map(r => ({
+      id: r.id,
+      status: r.status,
+      updatedAt: r.updatedAt,
+      candidateName: r.candidateName,
+      seniority: r.seniority,
+      positionTitle: r.positionTitle,
+    })),
   };
 }
 

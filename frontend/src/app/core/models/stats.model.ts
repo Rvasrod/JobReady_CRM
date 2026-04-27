@@ -1,17 +1,34 @@
-export interface SectorBucket { sector: string; count: number }
-export interface RatingBucket { rating: number; count: number }
-export interface RecentCompany {
+import { ApplicationStatus } from './application.model';
+
+export interface PipelineItem {
   id: number;
-  name: string;
-  sector: string | null;
-  rating: number | null;
-  createdAt: string;
+  candidateId: number;
+  candidateName: string;
+  seniority: string;
+  positionTitle: string;
+  skills: string[];
+}
+
+export interface PipelineStage {
+  status: ApplicationStatus;
+  count: number;
+  items: PipelineItem[];
+}
+
+export interface RecentApplication {
+  id: number;
+  candidateName: string;
+  positionTitle: string;
+  seniority: string;
+  status: ApplicationStatus;
+  updatedAt: string;
 }
 
 export interface DashboardStats {
-  total: number;
-  avgRating: number | string;
-  bySector: SectorBucket[];
-  byRating: RatingBucket[];
-  recent: RecentCompany[];
+  activeCandidates: number;
+  openPositions: number;
+  offersOut: number;
+  hiredThisMonth: number;
+  pipeline: PipelineStage[];
+  recent: RecentApplication[];
 }

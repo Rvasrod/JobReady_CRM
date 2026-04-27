@@ -20,9 +20,12 @@ export class AuthService {
       .pipe(tap((res) => this.persist(res)));
   }
 
-  register(name: string, email: string, password: string): Observable<AuthResponse> {
+  register(name: string, email: string, password: string, organizationName?: string, inviteCode?: string): Observable<AuthResponse> {
+    const payload: { name: string; email: string; password: string; organizationName?: string; inviteCode?: string } = { name, email, password };
+    if (organizationName) payload.organizationName = organizationName;
+    if (inviteCode) payload.inviteCode = inviteCode;
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/register`, { name, email, password })
+      .post<AuthResponse>(`${this.apiUrl}/register`, payload)
       .pipe(tap((res) => this.persist(res)));
   }
 
