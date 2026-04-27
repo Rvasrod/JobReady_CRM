@@ -37,6 +37,12 @@ async function findOneByOrg(id, organizationId) {
 }
 
 async function create(organizationId, userId, payload) {
+  const [userCheck] = await pool.execute(
+    'SELECT id FROM users WHERE id = ?',
+    [userId]
+  );
+  const validUserId = userCheck.length > 0 ? userId : null;
+
   const { name, email, phone, seniority, skills, linkedinUrl, notes } = payload;
   const [result] = await pool.execute(
     `INSERT INTO candidates
@@ -51,7 +57,7 @@ async function create(organizationId, userId, payload) {
       JSON.stringify(skills ?? []),
       linkedinUrl ?? null,
       notes ?? null,
-      userId ?? null,
+      validUserId,
     ]
   );
   return findOneByOrg(result.insertId, organizationId);

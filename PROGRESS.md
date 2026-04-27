@@ -867,17 +867,104 @@ Lazy chunks: dashboard, candidates-list, candidates-form, positions-list, positi
 
 ---
 
+## Resumen del Proyecto - Estado Actual
+
+### Modelo de datos implementado (ATS - Applicant Tracking System)
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│  organizations  │────▶│      users      │
+│ (empresas)     │     │ (reclutadores)  │
+└─────────────────┘     └────────┬────────┘
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+│  candidates   │     │   positions   │     │   positions   │
+│ (postulantes) │     │    (vacantes) │     │    (vacantes) │
+└───────┬───────┘     └───────┬───────┘     └───────┬───────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              ▼
+                  ┌───────────────────┐
+                  │   applications    │
+                  │  (candidaturas)   │
+                  │  candidateId      │
+                  │  positionId       │
+                  │  status (pipeline)│
+                  └─────────┬─────────┘
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+    ┌──────────────────┐      ┌──────────────────┐
+    │ application_events│      │    interviews    │
+    │   (historial)     │      │  (entrevistas)   │
+    └──────────────────┘      └──────────────────┘
+```
+
+### Backend - Endpoints implementados
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET/POST | /api/auth/register | Registro multi-tenant |
+| POST | /api/auth/login | Login |
+| GET | /api/auth/me | Perfil usuario |
+| GET/POST | /api/candidates | Listar/Crear candidatos |
+| GET/PUT/DELETE | /api/candidates/:id | CRUD candidato |
+| GET/POST | /api/positions | Listar/Crear vacantes |
+| GET/PUT/DELETE | /api/positions/:id | CRUD vacante |
+| GET/POST | /api/applications | Listar/Crear candidaturas |
+| GET/PATCH | /api/applications/:id/status | Cambiar estado pipeline |
+| GET | /api/applications/:id/events | Ver historial |
+| GET | /api/stats | Dashboard KPIs |
+
+### Frontend - Vistas implementadas
+
+| Vista | Ruta | Descripción |
+|-------|------|-------------|
+| Login | /login | Autenticación |
+| Registro | /register | Registro + crear/unirse org |
+| Dashboard | /dashboard | Métricas + pipeline general |
+| Candidatos | /candidates | Lista candidatos con filtros |
+| Candidatos/new, :id | /candidates/* | Formulario candidato |
+| Vacantes | /positions | Lista vacantes con filtros |
+| Vacantes/new, :id | /positions/* | Formulario vacante |
+| Detalle Vacante | /positions/:id/candidates | Pipeline por oferta |
+| Pipeline | /applications | Vista general candidaturas |
+
+### Funcionalidades implementadas
+
+- ✅ Registro/Login con JWT
+- ✅ Multi-tenancy (organizaciones aisladas)
+- ✅ Roles (admin, recruiter)
+- ✅ CRUD Candidates (nombre, email, skills, seniority, linkedin)
+- ✅ CRUD Positions (título, descripción, salary, modality, location, department)
+- ✅ Applications (candidatura = candidato × posición)
+- ✅ Pipeline (5 etapas: applied → cv_review → interview → technical_test → offer)
+- ✅ Events (historial automático de cambios de estado)
+- ✅ Dashboard stats (candidatos activos, vacantes, ofertas, contratados)
+- ✅ Filtros avanzados (buscar por skills, seniority, status, modality)
+- ✅ Vista pipeline por oferta (detalle de cada vacante)
+- ✅ Angular Material UI
+- ✅ Responsive design
+
+### Tecnologías
+
+- **Backend**: Node.js + Express + MySQL (MariaDB)
+- **Frontend**: Angular 20 + Angular Material
+- **Auth**: JWT con bcrypt
+- **Testing**: Jest (backend)
+
+---
+
 ## Pendiente
 
-### Lecciones futuras / mejoras
-- [ ] Filtros server-side con paginación (cuando crezcan los datos).
-- [ ] Gráficos reales con Chart.js o similar (ahora usamos progress-bars).
-- [ ] Validación más estricta en PUT (al menos 1 campo).
-- [ ] Manejo centralizado de errores con interceptor + snackbar (MatSnackBar).
-- [x] ~~Tests unitarios (Jest backend, Karma frontend).~~ ← Lección 1 (Sprint pro)
-- [ ] Tests para controllers/rutas (supertest) y para componentes Angular.
-- [ ] Dockerización + pipeline CI/CD.
-- [ ] Deploy real (backend en Railway/Render, frontend en Vercel/Netlify, DB gestionada).
+### Mejoras futuras
+- [ ] Filtros server-side con paginación
+- [ ] Gráficos Chart.js para dashboard
+- [ ] Tests unitarios y e2e
+- [ ] Dockerización
+- [ ] Deploy a producción
 
 ---
 
@@ -915,3 +1002,4 @@ curl http://localhost:3001/api/health
 - Candidatos: http://localhost:4200/candidates (requiere login)
 - Vacantes: http://localhost:4200/positions (requiere login)
 - Pipeline: http://localhost:4200/applications (requiere login)
+- Detalle Vacante: http://localhost:4200/positions/:id/candidates (requiere login)

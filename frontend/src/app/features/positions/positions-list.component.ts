@@ -92,6 +92,7 @@ import { Position, PositionStatus } from '../../core/models/position.model';
                 </div>
               </mat-card-content>
               <mat-card-actions>
+                <a mat-button [routerLink]="[position.id, 'candidates']">Candidatos</a>
                 <a mat-button [routerLink]="[position.id]">Editar</a>
                 <button mat-button color="warn" (click)="delete(position.id)">Eliminar</button>
               </mat-card-actions>

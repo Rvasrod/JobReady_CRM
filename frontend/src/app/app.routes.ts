@@ -69,6 +69,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'positions/:id/candidates',
+        loadComponent: () =>
+          import('./features/positions/position-detail.component').then(
+            (m) => m.PositionDetailComponent
+          ),
+      },
+      {
         path: 'applications',
         loadComponent: () =>
           import('./features/applications/applications-list.component').then(

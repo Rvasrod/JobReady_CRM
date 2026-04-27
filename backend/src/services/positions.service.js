@@ -27,6 +27,12 @@ async function create(organizationId, userId, payload) {
     title, description, requirements, seniority, status, 
     location, salary, modality, department 
   } = payload;
+  const [userCheck] = await pool.execute(
+    'SELECT id FROM users WHERE id = ?',
+    [userId]
+  );
+  const validUserId = userCheck.length > 0 ? userId : null;
+
   const [result] = await pool.execute(
     `INSERT INTO positions 
      (organizationId, title, description, requirements, seniority, status, location, salary, modality, department, createdBy)
@@ -42,7 +48,7 @@ async function create(organizationId, userId, payload) {
       salary ?? null,
       modality ?? 'presential',
       department ?? null,
-      userId ?? null,
+      validUserId,
     ]
   );
   return findOneByOrg(result.insertId, organizationId);

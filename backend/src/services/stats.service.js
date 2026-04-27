@@ -15,10 +15,9 @@ function parseSkills(value) {
 
 async function getDashboard(organizationId) {
   const [[{ activeCandidates }]] = await pool.execute(
-    `SELECT COUNT(DISTINCT a.candidateId) AS activeCandidates
-       FROM applications a
-      WHERE a.organizationId = ?
-        AND a.status NOT IN ('hired', 'rejected')`,
+    `SELECT COUNT(*) AS activeCandidates
+       FROM candidates
+      WHERE organizationId = ?`,
     [organizationId]
   );
 
