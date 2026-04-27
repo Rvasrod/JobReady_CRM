@@ -29,6 +29,11 @@ export interface DashboardStats {
   openPositions: number;
   offersOut: number;
   hiredThisMonth: number;
+  totalApplications: number;
+  totalHired: number;
+  totalRejected: number;
+  conversionRate: number;
+  avgDaysToHire: number;
   pipeline: PipelineStage[];
   recent: RecentApplication[];
 }

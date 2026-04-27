@@ -59,6 +59,40 @@ import { DashboardStats } from '../../core/models/stats.model';
           </mat-card>
         </div>
 
+        <div class="metrics-grid secondary">
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <mat-icon>description</mat-icon>
+              <div class="metric-value">{{ stats()!.totalApplications }}</div>
+              <div class="metric-label">Total aplicaciones</div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <div class="metric-value">{{ stats()!.totalHired }}</div>
+              <div class="metric-label">Total contratados</div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <mat-icon>trending_up</mat-icon>
+              <div class="metric-value">{{ stats()!.conversionRate }}%</div>
+              <div class="metric-label">Tasa conversión</div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <mat-icon>schedule</mat-icon>
+              <div class="metric-value">{{ stats()!.avgDaysToHire }}</div>
+              <div class="metric-label">Días promedio hire</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
         <h2>Pipeline</h2>
         <div class="pipeline-grid">
           @for (stage of stats()!.pipeline; track stage.status) {
@@ -116,6 +150,7 @@ import { DashboardStats } from '../../core/models/stats.model';
     h1 { margin: 0 0 24px; font-size: 28px; color: #1e293b; }
     h2 { font-size: 20px; color: #475569; margin: 32px 0 16px; }
     .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .metrics-grid.secondary { margin-top: 20px; }
     .metric-card { text-align: center; }
     .metric-card.highlight { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
     .metric-card.hired { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }

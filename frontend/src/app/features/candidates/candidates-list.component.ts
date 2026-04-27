@@ -35,7 +35,7 @@ import { Candidate } from '../../core/models/candidate.model';
       <div class="filters">
         <mat-form-field appearance="outline">
           <mat-label>Buscar</mat-label>
-          <input matInput [(ngModel)]="search" (input)="filter()" placeholder="Nombre o email">
+          <input matInput [(ngModel)]="search" (input)="filter()" placeholder="Nombre, email o skill">
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Seniority</mat-label>
@@ -46,6 +46,10 @@ import { Candidate } from '../../core/models/candidate.model';
             <mat-option value="senior">Senior</mat-option>
           </mat-select>
         </mat-form-field>
+        @if (hasFilters()) {
+          <button mat-stroked-button (click)="clearFilters()">Limpiar</button>
+        }
+        <span class="count">{{ filteredItems().length }} de {{ items().length }}</span>
       </div>
 
       @if (loading()) {
@@ -86,8 +90,9 @@ import { Candidate } from '../../core/models/candidate.model';
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { margin: 0; font-size: 28px; color: #1e293b; }
     .btn-primary { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; }
-    .filters { display: flex; gap: 16px; margin-bottom: 24px; }
+    .filters { display: flex; gap: 16px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
     mat-form-field { flex: 1; max-width: 300px; }
+    .count { color: #64748b; font-size: 14px; white-space: nowrap; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .card { margin-bottom: 0; }
     .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
@@ -125,12 +130,26 @@ export class CandidatesListComponent implements OnInit {
     let result = this.items();
     if (this.search) {
       const s = this.search.toLowerCase();
-      result = result.filter(c => c.name.toLowerCase().includes(s) || c.email.toLowerCase().includes(s));
+      result = result.filter(c => 
+        c.name.toLowerCase().includes(s) || 
+        c.email.toLowerCase().includes(s) ||
+        c.skills.some(skill => skill.toLowerCase().includes(s))
+      );
     }
     if (this.seniorityFilter) {
       result = result.filter(c => c.seniority === this.seniorityFilter);
     }
     this.filteredItems.set(result);
+  }
+
+  clearFilters(): void {
+    this.search = '';
+    this.seniorityFilter = '';
+    this.filteredItems.set(this.items());
+  }
+
+  hasFilters(): boolean {
+    return !!(this.search || this.seniorityFilter);
   }
 
   delete(id: number): void {

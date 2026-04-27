@@ -34,6 +34,10 @@ import { Position, PositionStatus } from '../../core/models/position.model';
 
       <div class="filters">
         <mat-form-field appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <input matInput [(ngModel)]="search" (input)="filter()" placeholder="Título o departamento">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
           <mat-label>Estado</mat-label>
           <mat-select [(ngModel)]="statusFilter" (selectionChange)="filter()">
             <mat-option value="">Todos</mat-option>
@@ -51,6 +55,10 @@ import { Position, PositionStatus } from '../../core/models/position.model';
             <mat-option value="hybrid">Híbrido</mat-option>
           </mat-select>
         </mat-form-field>
+        @if (hasFilters()) {
+          <button mat-stroked-button (click)="clearFilters()">Limpiar</button>
+        }
+        <span class="count">{{ filteredItems().length }} de {{ items().length }}</span>
       </div>
 
       @if (loading()) {
@@ -98,8 +106,9 @@ import { Position, PositionStatus } from '../../core/models/position.model';
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { margin: 0; font-size: 28px; color: #1e293b; }
     .btn-primary { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; }
-    .filters { margin-bottom: 24px; }
+    .filters { display: flex; gap: 16px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
     mat-form-field { width: 200px; }
+    .count { color: #64748b; font-size: 14px; white-space: nowrap; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .card { margin-bottom: 0; }
     .meta { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
@@ -123,6 +132,7 @@ export class PositionsListComponent implements OnInit {
   items = signal<Position[]>([]);
   filteredItems = signal<Position[]>([]);
   loading = signal(true);
+  search = '';
   statusFilter: PositionStatus | '' = '';
   modalityFilter = '';
 
@@ -143,6 +153,14 @@ export class PositionsListComponent implements OnInit {
 
   filter(): void {
     let result = this.items();
+    if (this.search) {
+      const s = this.search.toLowerCase();
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(s) || 
+        (p.description && p.description.toLowerCase().includes(s)) ||
+        (p.department && p.department.toLowerCase().includes(s))
+      );
+    }
     if (this.statusFilter) {
       result = result.filter(p => p.status === this.statusFilter);
     }
@@ -150,6 +168,17 @@ export class PositionsListComponent implements OnInit {
       result = result.filter(p => p.modality === this.modalityFilter);
     }
     this.filteredItems.set(result);
+  }
+
+  clearFilters(): void {
+    this.search = '';
+    this.statusFilter = '';
+    this.modalityFilter = '';
+    this.filteredItems.set(this.items());
+  }
+
+  hasFilters(): boolean {
+    return !!(this.search || this.statusFilter || this.modalityFilter);
   }
 
   delete(id: number): void {

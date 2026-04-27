@@ -89,11 +89,42 @@ async function getDashboard(organizationId) {
     [organizationId]
   );
 
+  const [[{ totalApplications }]] = await pool.execute(
+    `SELECT COUNT(*) AS totalApplications FROM applications WHERE organizationId = ?`,
+    [organizationId]
+  );
+
+  const [[{ totalHired }]] = await pool.execute(
+    `SELECT COUNT(*) AS totalHired FROM applications WHERE organizationId = ? AND status = 'hired'`,
+    [organizationId]
+  );
+
+  const [[{ totalRejected }]] = await pool.execute(
+    `SELECT COUNT(*) AS totalRejected FROM applications WHERE organizationId = ? AND status = 'rejected'`,
+    [organizationId]
+  );
+
+  const conversionRate = totalApplications > 0 
+    ? Math.round((totalHired / totalApplications) * 100) 
+    : 0;
+
+  const [[{ avgDaysToHire }]] = await pool.execute(
+    `SELECT AVG(DATEDIFF(updatedAt, createdAt)) AS avgDaysToHire
+       FROM applications
+      WHERE organizationId = ? AND status = 'hired'`,
+    [organizationId]
+  );
+
   return {
     activeCandidates,
     openPositions,
     offersOut,
     hiredThisMonth,
+    totalApplications,
+    totalHired,
+    totalRejected,
+    conversionRate,
+    avgDaysToHire: Math.round(avgDaysToHire || 0),
     pipeline,
     recent: recent.map(r => ({
       id: r.id,

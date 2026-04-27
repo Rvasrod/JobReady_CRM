@@ -847,16 +847,23 @@ Lazy chunks: dashboard, candidates-list, candidates-form, positions-list, positi
 - `position.model.ts` - nuevos campos Modality
 
 ### Filtros avanzados
-- Positions: filtro por estado + modalidad
-- Filtros combinados funcionan correctamente
+- Positions: filtro por estado + modalidad + búsqueda por título/descripción
+- Candidates: filtro por seniority + búsqueda por nombre/email/skills
+- Botón limpiar filtros + contador de resultados
+
+### Dashboard mejorado
+- Métricas básicas: candidatos activos, vacantes abiertas, ofertas, contratados mes
+- Métricas avanzadas: total aplicaciones, total contratados, tasa conversión (%), días promedio hire
+- Backend: stats.service.js calcula todas las métricas
+- Frontend: nueva fila de métricas secundarias
 
 ---
 
 ## Fase 6 (pivote ATS) — Pendiente
 - [ ] Testing end-to-end completo en navegador
 - [ ] Limpiar componentes antiguos de "companies"
-- [ ] Ver historial de eventos en UI
-- [ ] Dashboard con timeline de eventos
+- [ ] Ver historial de eventos en UI (detalle de aplicación)
+- [ ] Mejoras visuales en pipeline
 
 ---
 
