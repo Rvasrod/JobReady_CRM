@@ -23,16 +23,25 @@ async function findOneByOrg(id, organizationId) {
 }
 
 async function create(organizationId, userId, payload) {
-  const { title, description, seniority, status } = payload;
+  const { 
+    title, description, requirements, seniority, status, 
+    location, salary, modality, department 
+  } = payload;
   const [result] = await pool.execute(
-    `INSERT INTO positions (organizationId, title, description, seniority, status, createdBy)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO positions 
+     (organizationId, title, description, requirements, seniority, status, location, salary, modality, department, createdBy)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       organizationId,
       title,
       description ?? null,
+      requirements ?? null,
       seniority ?? 'mid',
       status ?? 'open',
+      location ?? null,
+      salary ?? null,
+      modality ?? 'presential',
+      department ?? null,
       userId ?? null,
     ]
   );
@@ -43,19 +52,32 @@ async function update(id, organizationId, payload) {
   const existing = await findOneByOrg(id, organizationId);
   if (!existing) throw notFound();
 
-  const { title, description, seniority, status } = payload;
+  const { 
+    title, description, requirements, seniority, status, 
+    location, salary, modality, department 
+  } = payload;
   await pool.execute(
     `UPDATE positions SET
        title       = COALESCE(?, title),
        description = COALESCE(?, description),
+       requirements = COALESCE(?, requirements),
        seniority   = COALESCE(?, seniority),
-       status      = COALESCE(?, status)
+       status      = COALESCE(?, status),
+       location    = COALESCE(?, location),
+       salary      = COALESCE(?, salary),
+       modality    = COALESCE(?, modality),
+       department  = COALESCE(?, department)
      WHERE id = ? AND organizationId = ?`,
     [
       title ?? null,
       description ?? null,
+      requirements ?? null,
       seniority ?? null,
       status ?? null,
+      location ?? null,
+      salary ?? null,
+      modality ?? null,
+      department ?? null,
       id,
       organizationId,
     ]

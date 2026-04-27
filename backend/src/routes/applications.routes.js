@@ -14,6 +14,7 @@ router.use(auth);
 
 router.get('/', controller.list);
 router.get('/:id', controller.detail);
+router.get('/:id/events', controller.getEvents);
 router.post('/', createValidator, validate, controller.create);
 router.put('/:id', updateValidator, validate, controller.update);
 router.patch('/:id/status', statusValidator, validate, controller.updateStatus);

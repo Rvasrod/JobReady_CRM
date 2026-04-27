@@ -821,11 +821,42 @@ Lazy chunks: dashboard, candidates-list, candidates-form, positions-list, positi
 
 ---
 
-## Fase 5 (pivote ATS) — Pendiente
+## Fase 5 (pivote ATS) — Mejoras añadidas ✅
+
+**Fecha:** 2026-04-27
+
+### Nuevos campos en Positions
+- `salary` - rango salarial (ej: "30.000 - 45.000 €")
+- `modality` - remote / presential / hybrid
+- `location` - ubicación física
+- `requirements` - requisitos específicos
+
+### Nueva tabla: application_events
+- Historial automático de cambios de estado
+- Tipos: status_changed, note_added, interview_scheduled, offer_sent, offer_accepted, offer_rejected, rejected
+- Se crea automáticamente al cambiar estado de candidatura
+
+### Backend
+- `services/application-events.service.js` - nuevo servicio
+- `applications.controller.js` - endpoint GET /:id/events
+- `positions.service.js` - actualizado con nuevos campos
+
+### Frontend
+- `positions-form.component.ts` - campos salary, modality
+- `positions-list.component.ts` - filtros por status y modality, muestra salary
+- `position.model.ts` - nuevos campos Modality
+
+### Filtros avanzados
+- Positions: filtro por estado + modalidad
+- Filtros combinados funcionan correctamente
+
+---
+
+## Fase 6 (pivote ATS) — Pendiente
 - [ ] Testing end-to-end completo en navegador
 - [ ] Limpiar componentes antiguos de "companies"
-- [ ] Validación de formularios más estricta
-- [ ] Manejo de errores con MatSnackBar
+- [ ] Ver historial de eventos en UI
+- [ ] Dashboard con timeline de eventos
 
 ---
 

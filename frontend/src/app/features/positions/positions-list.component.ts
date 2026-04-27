@@ -42,6 +42,15 @@ import { Position, PositionStatus } from '../../core/models/position.model';
             <mat-option value="closed">Cerrada</mat-option>
           </mat-select>
         </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Modalidad</mat-label>
+          <mat-select [(ngModel)]="modalityFilter" (selectionChange)="filter()">
+            <mat-option value="">Todas</mat-option>
+            <mat-option value="remote">Remoto</mat-option>
+            <mat-option value="presential">Presencial</mat-option>
+            <mat-option value="hybrid">Híbrido</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       @if (loading()) {
@@ -63,8 +72,14 @@ import { Position, PositionStatus } from '../../core/models/position.model';
                 <div class="meta">
                   <span class="chip" [class]="position.status">{{ position.status }}</span>
                   <span class="chip seniority">{{ position.seniority }}</span>
+                  <span class="chip modality" [class]="position.modality">{{ position.modality }}</span>
+                </div>
+                <div class="details">
                   @if (position.location) {
-                    <span class="location">📍 {{ position.location }}</span>
+                    <span class="detail">📍 {{ position.location }}</span>
+                  }
+                  @if (position.salary) {
+                    <span class="detail">💰 {{ position.salary }}</span>
                   }
                 </div>
               </mat-card-content>
@@ -93,7 +108,11 @@ import { Position, PositionStatus } from '../../core/models/position.model';
     .chip.paused { background: #fef3c7; color: #92400e; }
     .chip.closed { background: #f1f5f9; color: #475569; }
     .chip.seniority { background: #e2e8f0; color: #475569; }
-    .location { font-size: 13px; color: #64748b; }
+    .chip.modality { background: #ede9fe; color: #7c3aed; }
+    .chip.modality.remote { background: #dbeafe; color: #1d4ed8; }
+    .chip.modality.hybrid { background: #fef3c7; color: #b45309; }
+    .details { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .detail { font-size: 13px; color: #64748b; }
     .loading, .empty { text-align: center; padding: 60px; color: #64748b; }
     .empty p { margin-bottom: 16px; }
   `],
@@ -105,6 +124,7 @@ export class PositionsListComponent implements OnInit {
   filteredItems = signal<Position[]>([]);
   loading = signal(true);
   statusFilter: PositionStatus | '' = '';
+  modalityFilter = '';
 
   ngOnInit(): void {
     this.load();
@@ -125,6 +145,9 @@ export class PositionsListComponent implements OnInit {
     let result = this.items();
     if (this.statusFilter) {
       result = result.filter(p => p.status === this.statusFilter);
+    }
+    if (this.modalityFilter) {
+      result = result.filter(p => p.modality === this.modalityFilter);
     }
     this.filteredItems.set(result);
   }

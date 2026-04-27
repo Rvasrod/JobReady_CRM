@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PositionsService } from '../../core/services/positions.service';
-import { Position, PositionStatus, Seniority } from '../../core/models/position.model';
+import { Position, PositionStatus, Seniority, Modality } from '../../core/models/position.model';
 
 @Component({
   selector: 'positions-form',
@@ -44,9 +44,25 @@ import { Position, PositionStatus, Seniority } from '../../core/models/position.
               <input matInput formControlName="department">
             </mat-form-field>
 
+            <div class="row">
+              <mat-form-field appearance="outline">
+                <mat-label>Ubicación</mat-label>
+                <input matInput formControlName="location" placeholder="Madrid, España">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Salario</mat-label>
+                <input matInput formControlName="salary" placeholder="30.000 - 45.000 €">
+              </mat-form-field>
+            </div>
+
             <mat-form-field appearance="outline">
-              <mat-label>Ubicación</mat-label>
-              <input matInput formControlName="location">
+              <mat-label>Modalidad</mat-label>
+              <mat-select formControlName="modality">
+                <mat-option value="presential">Presencial</mat-option>
+                <mat-option value="remote">Remoto</mat-option>
+                <mat-option value="hybrid">Híbrido</mat-option>
+              </mat-select>
             </mat-form-field>
 
             <div class="row">
@@ -113,6 +129,8 @@ export class PositionsFormComponent implements OnInit {
     title: ['', Validators.required],
     department: [''],
     location: [''],
+    salary: [''],
+    modality: ['presential' as Modality],
     seniority: ['mid' as Seniority, Validators.required],
     status: ['open' as PositionStatus, Validators.required],
     description: [''],
@@ -131,6 +149,8 @@ export class PositionsFormComponent implements OnInit {
             title: p.title,
             department: p.department || '',
             location: p.location || '',
+            salary: p.salary || '',
+            modality: p.modality || 'presential',
             seniority: p.seniority,
             status: p.status,
             description: p.description || '',

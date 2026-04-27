@@ -69,8 +69,13 @@ CREATE TABLE positions (
   organizationId INT NOT NULL,
   title VARCHAR(150) NOT NULL,
   description TEXT,
+  requirements TEXT,
   seniority ENUM('junior', 'mid', 'senior') DEFAULT 'mid',
   status ENUM('open', 'paused', 'closed') NOT NULL DEFAULT 'open',
+  location VARCHAR(150),
+  salary VARCHAR(100),
+  modality ENUM('remote', 'presential', 'hybrid') DEFAULT 'presential',
+  department VARCHAR(100),
   createdBy INT,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (organizationId) REFERENCES organizations(id) ON DELETE CASCADE,
@@ -107,6 +112,29 @@ CREATE TABLE applications (
   INDEX idx_applications_status (organizationId, status),
   INDEX idx_applications_candidate (candidateId),
   INDEX idx_applications_position (positionId)
+);
+
+-- ─────────────────────────────────────────────────────────────
+-- application_events (historial de eventos de cada candidatura)
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE application_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  applicationId INT NOT NULL,
+  userId INT NOT NULL,
+  eventType ENUM(
+    'status_changed',
+    'note_added',
+    'interview_scheduled',
+    'offer_sent',
+    'offer_accepted',
+    'offer_rejected',
+    'rejected'
+  ) NOT NULL,
+  description TEXT,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (applicationId) REFERENCES applications(id) ON DELETE CASCADE,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_events_application (applicationId)
 );
 
 -- ─────────────────────────────────────────────────────────────
