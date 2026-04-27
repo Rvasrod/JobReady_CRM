@@ -385,20 +385,87 @@ Detalles SQL:
 
 ---
 
+## Lección 8 — Deploy y Portfolio ✅ COMPLETADA (local)
+
+**Fecha:** 2026-04-27
+
+### Acciones realizadas
+
+**README.md profesional** en la raíz con:
+- Descripción del producto y stack.
+- Funcionalidades implementadas y roadmap.
+- Requisitos previos + setup paso a paso (DB, backend, frontend).
+- Tabla con todos los endpoints REST.
+- Estructura completa del proyecto.
+- Decisiones técnicas (signals, JWT, bcrypt 12, prepared statements, etc.).
+
+**`.gitignore` raíz** que excluye:
+- `node_modules/`, `dist/`, `.angular/`, `.cache/`
+- `.env` (no se filtra ningún secreto)
+- `.claude/`, `.vscode/`, `.idea/`
+- Logs, OS files (`.DS_Store`, `Thumbs.db`), coverage, temporales.
+
+**`backend/.env.example`** plantilla sin secretos, con comentarios y ejemplo `openssl rand -base64 64` para `JWT_SECRET`.
+
+**Repositorio git inicializado:**
+- `git init -b main`
+- 47 archivos staged (~14k líneas).
+- Verificado con `git check-ignore` que `node_modules`, `.env`, `dist/`, `.angular/`, `.claude/` están excluidos.
+- **Primer commit y push a GitHub: PENDIENTES de tu autorización explícita.**
+
+### Checklist final del proyecto
+
+| Criterio | Estado |
+|----------|--------|
+| Login y registro funcionan | ✅ |
+| CRUD principal completo (companies) | ✅ |
+| Dashboard con métricas reales | ✅ |
+| Filtros y búsqueda funcionan | ✅ |
+| Formularios con validaciones | ✅ |
+| JWT protege las rutas (guard + interceptor) | ✅ |
+| README profesional escrito | ✅ |
+| `.gitignore` configurado | ✅ |
+| Variables de entorno en `.env.example` | ✅ |
+| Repositorio git local | ✅ |
+| Repositorio en GitHub | ⏳ pendiente del usuario (`gh repo create` + push) |
+
+### Próximos pasos para el usuario
+
+**Hacer el primer commit (cuando autorices):**
+```bash
+cd C:/Users/robev/Desktop/JobReady_CRM
+git commit -m "feat: initial commit — JobReady CRM"
+```
+
+**Crear repo en GitHub y subir:**
+```bash
+gh auth login                                         # primera vez
+gh repo create jobready-crm --public --source=. --remote=origin --push
+# o manual:
+# gh repo create jobready-crm --public
+# git remote add origin https://github.com/<tu-user>/jobready-crm.git
+# git push -u origin main
+```
+
+**Para el portfolio / LinkedIn:**
+- Captura del dashboard con datos reales.
+- Captura del CRUD de companies con filtros activos.
+- Demo de 3 minutos: login → dashboard → crear empresa → filtrar → editar.
+- Link al repo en CV con stack: `Angular 20, Node.js, Express, MySQL`.
+
+---
+
 ## Pendiente
 
-### Lecciones futuras
-- [ ] Rutas backend para `applications`, `interviews`, `follow_up_tasks`.
-- [ ] Componentes UI para applications/interviews/tasks.
+### Lecciones futuras / mejoras
+- [ ] Rutas backend + UI para `applications`, `interviews`, `follow_up_tasks`.
 - [ ] Filtros server-side con paginación (cuando crezcan los datos).
 - [ ] Gráficos reales con Chart.js o similar (ahora usamos progress-bars).
-
-### Mejoras técnicas pendientes
-- [ ] Crear `.gitignore` raíz (excluir `node_modules/`, `.env`, `dist/`).
-- [ ] Inicializar git en raíz del proyecto.
 - [ ] Validación más estricta en PUT (al menos 1 campo).
-- [ ] Manejo centralizado de errores con interceptor + snackbar.
-- [ ] MatSnackBar para feedback de éxito en CRUD.
+- [ ] Manejo centralizado de errores con interceptor + snackbar (MatSnackBar).
+- [ ] Tests unitarios (Jest backend, Karma frontend).
+- [ ] Dockerización + pipeline CI/CD.
+- [ ] Deploy real (backend en Railway/Render, frontend en Vercel/Netlify, DB gestionada).
 
 ---
 
