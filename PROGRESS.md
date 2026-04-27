@@ -684,6 +684,83 @@ DB final: 1 org `AccioSoft`, 2 users (admin + recruiter) en la misma org.
 
 ---
 
+## Fase 3 (pivote ATS) — API candidates / positions / applications ✅ COMPLETADA
+
+**Fecha:** 2026-04-27
+
+### Limpieza
+Eliminados todos los restos del antiguo recurso `companies`:
+- `services/companies.service.js`
+- `controllers/companies.controller.js`
+- `validators/companies.validators.js`
+- `routes/companies.routes.js`
+- `tests/services/companies.service.test.js`
+
+`app.js` ya no monta `/api/companies`.
+
+### Nuevos recursos (capa 4: routes/validators/controllers/services)
+
+**`/api/candidates`** — CRUD de postulantes scopeado por `organizationId`.
+- Skills se guardan como JSON array en MySQL y se devuelven ya parseados.
+- Service hace `JSON.stringify` al insertar y trata cualquier formato de lectura
+  (string/array/null) → siempre devuelve un array al frontend.
+- `createdBy` apunta al usuario que añadió al candidato.
+
+**`/api/positions`** — CRUD de vacantes scopeado por `organizationId`.
+- ENUM `status` (`open`/`paused`/`closed`).
+- ENUM `seniority` (`junior`/`mid`/`senior`).
+
+**`/api/applications`** — relación candidato × posición + estado del pipeline.
+- Lista hace JOIN con `candidates` y `positions` → cada item incluye `candidateName`,
+  `positionTitle`, etc. para UI.
+- Endpoint dedicado `PATCH /api/applications/:id/status` para mover etapa
+  (validador whitelist con los 7 estados).
+- Al crear, valida que `candidateId` y `positionId` pertenecen a la misma org → 400 si no.
+
+### `stats.service.js` reescrito
+Datos pensados para el dashboard del mockup:
+- **KPIs:** `activeCandidates`, `openPositions`, `offersOut`, `hiredThisMonth`.
+- **Pipeline:** array con las 5 etapas activas (`applied`, `cv_review`, `interview`,
+  `technical_test`, `offer`), cada una con `count` y hasta 5 `items` (con candidateName,
+  seniority, skills parseadas, positionTitle).
+- **Recent:** últimas 10 aplicaciones por `updatedAt` (con datos joined).
+
+`stats.controller.js` ahora pasa `req.user.organizationId` (antes pasaba `req.user.id`).
+
+### Tests Jest
+Total: **35 / 35 passed (6 suites)**.
+
+| Suite | Tests | Cubre |
+|---|---|---|
+| auth.service | 8 | register admin/recruiter, JWT con orgId+role, errores |
+| organizations.service | 5 | findByInviteCode, create + retry colisión |
+| candidates.service | 6 | scoping por org, JSON skills, 404 en update/remove |
+| positions.service | 4 | scoping, defaults (status='open'), 404 |
+| applications.service | 6 | JOIN, ownership cross-org, updateStatus whitelist, 404 |
+| stats.service | 2 | agregación completa, todos los counts en cero |
+
+### Smoke test end-to-end
+Backend arrancado contra MySQL local con la BD limpia:
+
+| Caso | Resultado |
+|---|---|
+| Login admin de AccioSoft | 200 + JWT |
+| `POST /positions` "Senior Angular Developer" | 201, `id=1`, `status=open` |
+| `POST /candidates` Carlos Vega + skills `["Angular","TypeScript","RxJS"]` | 201, skills devueltas como array |
+| `POST /applications` candidato 1 × posición 1 | 201, JOIN devuelve `candidateName` y `positionTitle` |
+| `PATCH /applications/1/status status=interview` | 200 |
+| `PATCH /applications/1/status status=magic` | 400 "Status inválido" (validator) |
+| `GET /stats` desde AccioSoft | KPIs correctos + pipeline con Carlos en columna `interview` |
+| Registro de OtraEmpresa (org nueva, admin) | 201 |
+| `GET /candidates` con token de OtraEmpresa | `[]` (aislamiento OK) |
+| `GET /candidates/1` con token de OtraEmpresa | 404 "Candidato no encontrado" (no leak) |
+| `GET /stats` con token de OtraEmpresa | KPIs en cero, pipeline vacío |
+
+Confirmado: scoping por `organizationId` impide cruzar datos entre organizaciones, incluso
+intentando acceder por id directo (devuelve 404 sin revelar existencia).
+
+---
+
 ## Pendiente
 
 ### Lecciones futuras / mejoras

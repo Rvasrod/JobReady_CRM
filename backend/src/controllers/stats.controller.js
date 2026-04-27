@@ -2,7 +2,7 @@ const service = require('../services/stats.service');
 
 async function dashboard(req, res) {
   try {
-    const data = await service.getDashboard(req.user.id);
+    const data = await service.getDashboard(req.user.organizationId);
     res.json({ success: true, data });
   } catch (error) {
     res

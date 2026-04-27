@@ -1,6 +1,10 @@
 const express = require('express');
-const controller = require('../controllers/companies.controller');
-const { createValidator, updateValidator } = require('../validators/companies.validators');
+const controller = require('../controllers/applications.controller');
+const {
+  createValidator,
+  updateValidator,
+  statusValidator,
+} = require('../validators/applications.validators');
 const validate = require('../middleware/validate.middleware');
 const auth = require('../middleware/auth.middleware');
 
@@ -12,6 +16,7 @@ router.get('/', controller.list);
 router.get('/:id', controller.detail);
 router.post('/', createValidator, validate, controller.create);
 router.put('/:id', updateValidator, validate, controller.update);
+router.patch('/:id/status', statusValidator, validate, controller.updateStatus);
 router.delete('/:id', controller.remove);
 
 module.exports = router;
