@@ -550,6 +550,81 @@ frontend: TOTAL: 9 SUCCESS (Chrome Headless)
 
 ---
 
+## Pivote de dominio — De *personal tracker* a *ATS empresarial* 🔄
+
+**Fecha:** 2026-04-27
+
+### Por qué pivotamos
+El planteamiento original de JobReady CRM era un *personal job tracker* donde cada usuario
+registraba las empresas a las que se postulaba personalmente. La interpretación correcta es la
+opuesta: **una aplicación para que una empresa lleve el registro de los postulantes** que
+aplican a sus vacantes (Applicant Tracking System / ATS).
+
+Lo que se aprovecha del trabajo previo:
+- ✅ Arquitectura backend en 4 capas (Lección 1).
+- ✅ Estructura frontend `core/features/shared`.
+- ✅ Patrón de auth con JWT, guard, interceptor.
+- ✅ Setup de tests Jest + Karma.
+- ✅ Componentes < 150 líneas y separación template/styles.
+
+Lo que cambia: el dominio (entidades) y la UI shell (sidebar+topbar SaaS en vez de toolbar Material).
+
+### Decisiones del pivote
+1. **Multi-tenant por organización** (`organizationId` discriminator). Cada empresa cliente
+   tiene su espacio aislado; los reclutadores de la misma empresa comparten datos.
+2. **Onboarding por inviteCode** — el primer registro crea una organización nueva (con un
+   código de invitación generado); recruiters posteriores se unen aportando ese código.
+3. **Roles básicos** — `admin` (gestiona la org + invita) y `recruiter` (gestiona pipeline).
+4. **Pipeline de 7 etapas** — `applied → cv_review → interview → technical_test → offer → hired`
+   (+ `rejected` terminal). MVP sin drag&drop (botones para mover etapa).
+5. **Skills como JSON array** en `candidates.skills` — simple, suficiente para filtrado básico.
+6. **Estilo visual SaaS plano** (sidebar + topbar custom CSS), reemplazando la toolbar Material.
+
+### Plan en 6 fases
+1. ⏳ Schema + ARCHITECTURE.md actualizado.
+2. ⏳ Auth multi-tenant (organizations + roles).
+3. ⏳ API: candidates, positions, applications.
+4. ⏳ Frontend app shell (sidebar + topbar).
+5. ⏳ Features: candidates, positions, pipeline kanban, dashboard nuevo.
+6. ⏳ Docs finales.
+
+---
+
+## Fase 1 (pivote ATS) — Schema + ARCHITECTURE ✅ COMPLETADA
+
+**Fecha:** 2026-04-27
+
+### Entidades nuevas
+- **organizations** — empresas cliente. Campos: `name`, `inviteCode` (UNIQUE).
+- **users** — pasa a tener `organizationId` + `role ENUM('admin','recruiter')`.
+- **candidates** — postulantes. Skills como `JSON`, `seniority` ENUM, `linkedinUrl`.
+- **positions** — vacantes. `status ENUM('open','paused','closed')`, `seniority` objetivo.
+- **applications** — relación candidato × posición + estado del pipeline. `organizationId`
+  denormalizado para scoping fácil.
+- **interviews** — vinculadas a una application.
+
+### Estados del pipeline (`applications.status`)
+`applied` · `cv_review` · `interview` · `technical_test` · `offer` · `hired` · `rejected`
+
+### Aislamiento multi-tenant
+Toda query con datos sensibles filtra por `organizationId = req.user.organizationId`. Índices
+compuestos `(organizationId, …)` para que el scoping sea barato.
+
+### Aplicado en local
+```bash
+/c/xampp/mysql/bin/mysql.exe -u root < backend/src/db/schema.sql
+# 6 tablas creadas (organizations, users, candidates, positions, applications, interviews)
+```
+
+El schema es destructivo (`SET FOREIGN_KEY_CHECKS = 0` + `DROP IF EXISTS` + `CREATE`) porque no
+había datos reales que migrar y queremos partir limpio.
+
+### ARCHITECTURE.md
+Reescrito completamente con el dominio nuevo: descripción del producto, modelo de datos,
+relaciones, aislamiento por org, tabla de roles/permisos, decisiones técnicas.
+
+---
+
 ## Pendiente
 
 ### Lecciones futuras / mejoras
